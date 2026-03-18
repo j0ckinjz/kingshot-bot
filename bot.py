@@ -30,6 +30,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 import requests
+from curl_cffi import requests as curl_requests
 import telebot
 from apscheduler.schedulers.background import BackgroundScheduler
 
@@ -576,15 +577,19 @@ def fetch_active_codes() -> list:
     Fetch active gift codes from the API.
     Retries up to 3 times on failure.
     Handles multiple possible API response shapes.
+    De-duplicates codes while preserving order.
     """
-    headers = {"User-Agent": "Mozilla/5.0 KingShot-GiftBot/2.0"}
     for attempt in range(1, 4):
         try:
-            r = requests.get(API_URL, headers=headers, timeout=15)
+            r = curl_requests.get(
+                API_URL,
+                impersonate="chrome120",
+                timeout=15
+            )
+
             r.raise_for_status()
             data = r.json()
 
-            # Try every known response shape
             raw = (
                 data.get("data", {}).get("giftCodes")
                 or data.get("giftCodes")
@@ -592,31 +597,37 @@ def fetch_active_codes() -> list:
                 or data.get("data")
                 or []
             )
+
             if not isinstance(raw, list):
                 log.warning(f"Unexpected API response shape: {type(raw)}")
                 return []
 
             result = []
+            seen_codes = set()
+
             for c in raw:
+                code_val = ""
+
                 if isinstance(c, str) and c.strip():
-                    result.append(c.strip().upper())
+                    code_val = c.strip().upper()
                 elif isinstance(c, dict):
                     code_val = (
-                        c.get("code") or c.get("gift_code")
-                        or c.get("giftCode") or c.get("name") or ""
+                        c.get("code")
+                        or c.get("gift_code")
+                        or c.get("giftCode")
+                        or c.get("name")
+                        or ""
                     )
-                    if code_val:
-                        result.append(str(code_val).strip().upper())
+                    code_val = str(code_val).strip().upper()
+
+                if code_val and code_val not in seen_codes:
+                    seen_codes.add(code_val)
+                    result.append(code_val)
+
             return result
 
-        except requests.exceptions.HTTPError as e:
-            log.error(f"API HTTP error (attempt {attempt}/3): {e}")
-        except requests.exceptions.ConnectionError as e:
-            log.error(f"API connection error (attempt {attempt}/3): {e}")
-        except requests.exceptions.Timeout:
-            log.error(f"API timeout (attempt {attempt}/3)")
         except Exception as e:
-            log.error(f"API unexpected error (attempt {attempt}/3): {e}")
+            log.error(f"API fetch error (attempt {attempt}/3): {e}")
 
         if attempt < 3:
             time.sleep(5)
