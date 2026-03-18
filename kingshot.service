@@ -5,8 +5,8 @@ Wants=network-online.target
 
 [Service]
 # ── Change 'ubuntu' to your Oracle VM username if different ──
-User=%u
-WorkingDirectory=%h/kingshot-bot
+User=ubuntu
+WorkingDirectory=/home/ubuntu/kingshot-bot
 
 # ── Set your tokens here ──────────────────────────────────────
 # Option A: Put values directly here (simpler)
@@ -16,9 +16,9 @@ WorkingDirectory=%h/kingshot-bot
 
 # ── Option B: Use a .env file instead ────────────────────────
 # Comment out the three lines above and uncomment this line:
-EnvironmentFile=%h/kingshot-bot/.env
+EnvironmentFile=/home/ubuntu/kingshot-bot/.env
 
-ExecStart=/usr/bin/python3 %h/kingshot-bot/bot.py
+ExecStart=/usr/bin/python3 /home/ubuntu/kingshot-bot/bot.py
 
 # Auto-restart on crash, wait 10s before retrying
 Restart=always
