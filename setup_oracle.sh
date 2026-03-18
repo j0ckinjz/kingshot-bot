@@ -52,6 +52,7 @@ pip3 install \
     pyTelegramBotAPI==4.18.0 \
     APScheduler==3.10.4 \
     python-dotenv==1.0.1 \
+    curl_cffi==0.14.0 \
     -q
 echo "   ✅ Python packages installed."
 
