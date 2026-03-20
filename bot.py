@@ -144,15 +144,16 @@ def save_seen(seen: dict):
 
 def mark_redeemed(seen: dict, code: str, pid: str):
     """Mark a player as having redeemed a code in the hashmap."""
-    if code not in seen:
-        seen[code] = []
-    if pid not in seen[code]:
-        seen[code].append(pid)
+    key = code.upper()
+    if key not in seen:
+        seen[key] = []
+    if pid not in seen[key]:
+        seen[key].append(pid)
 
 
 def has_redeemed(seen: dict, code: str, pid: str) -> bool:
     """Check hashmap — O(1) lookup."""
-    return pid in seen.get(code, [])
+    return pid in seen.get(code.upper(), [])
 
 
 def is_admin(uid: int) -> bool:
@@ -418,7 +419,7 @@ def cmd_add_code(message):
     if len(parts) < 2:
         bot.reply_to(message, "❌ Usage: `/addcode <CODE>`", parse_mode="Markdown")
         return
-    code    = parts[1].strip().upper()
+    code    = parts[1].strip()
     players = load_players()
     if not players:
         bot.reply_to(message, "⚠️ No players registered yet.", parse_mode="Markdown")
@@ -576,7 +577,7 @@ def fetch_active_codes() -> list:
     Fetch active gift codes from the API.
     Retries up to 3 times on failure.
     Handles multiple possible API response shapes.
-    De-duplicates codes while preserving order.
+    De-duplicates codes while preserving original case.
     """
     for attempt in range(1, 4):
         try:
@@ -608,7 +609,7 @@ def fetch_active_codes() -> list:
                 code_val = ""
 
                 if isinstance(c, str) and c.strip():
-                    code_val = c.strip().upper()
+                    code_val = c.strip()
                 elif isinstance(c, dict):
                     code_val = (
                         c.get("code")
@@ -617,11 +618,13 @@ def fetch_active_codes() -> list:
                         or c.get("name")
                         or ""
                     )
-                    code_val = str(code_val).strip().upper()
+                    code_val = str(code_val).strip()
 
-                if code_val and code_val not in seen_codes:
-                    seen_codes.add(code_val)
-                    result.append(code_val)
+                normalized = code_val.upper()
+
+                if code_val and normalized not in seen_codes:
+                    seen_codes.add(normalized)
+                    result.append(code_val)  # keep original case for redemption
 
             return result
 
@@ -686,7 +689,7 @@ def check_and_redeem():
         any_work_done = False
 
         for code in active_codes:
-            is_new = code not in seen
+            is_new = code.upper() not in seen
             pending = [
                 (p["id"], p["name"])
                 for p in players
