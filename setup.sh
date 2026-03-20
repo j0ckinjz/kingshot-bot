@@ -10,8 +10,9 @@
 #   1. Updates the system
 #   2. Installs Google Chrome (for Selenium)
 #   3. Installs Python 3 + pip + Python dependencies
-#   4. Creates logs and screenshots directories
-#   5. Creates .env and service files
+#   4. Adds /.local/bin to PATH
+#   5. Creates logs and screenshots directories
+#   6. Creates .env and service files
 # ─────────────────────────────────────────────────────────────────────────────
 
 set -e  # Stop on any error
