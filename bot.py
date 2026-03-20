@@ -1,5 +1,5 @@
 """
-KingShot Gift Code Bot — Telegram Edition (Oracle Cloud / Polling Mode)
+KingShot Gift Code Bot — Telegram Edition (Ubuntu)
 ========================================================================
 HashMap-based per-player code tracking:
   seen_codes.json = { "CODE123": ["pid1", "pid2"], "CODE456": ["pid1"] }
@@ -29,7 +29,6 @@ from datetime import datetime
 from dotenv import load_dotenv
 load_dotenv()
 
-import requests
 from curl_cffi import requests as curl_requests
 import telebot
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -566,7 +565,7 @@ def cmd_status(message):
         f"⏱  Check interval     : every `{CHECK_INTERVAL}` min\n"
         f"🕐 Uptime             : `{get_uptime()}`\n"
         f"📡 Scheduler          : {check_status}\n"
-        f"🖥  Mode               : Polling (Oracle Cloud)"
+        f"🖥  Mode               : Polling"
     ), parse_mode="Markdown")
 
 
@@ -743,9 +742,9 @@ def check_and_redeem():
 # ─── Entry point ───────────────────────────────────────────────────────────
 
 def main():
-    log.info("╔═══════════════════════════════════════════════╗")
-    log.info("║  KingShot Auto Gift Code Bot (Oracle Cloud)   ║")
-    log.info("╚═══════════════════════════════════════════════╝")
+    log.info("╔═════════════════════════════════════════╗")
+    log.info("║  KingShot Auto Gift Code Bot (Ubuntu)   ║")
+    log.info("╚═════════════════════════════════════════╝")
     log.info(f"Admin IDs      : {ADMIN_IDS}")
     log.info(f"Check interval : {CHECK_INTERVAL} min")
     log.info(f"API endpoint   : {API_URL}")
