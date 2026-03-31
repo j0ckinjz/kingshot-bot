@@ -21,6 +21,7 @@ Before you begin, ensure you have:
 ### Option A — Clone from GitHub
 
 ```bash
+sudo apt install git
 git clone https://github.com/j0ckinjz/kingshot-bot.git
 cd ~/kingshot-bot
 ```
