@@ -25,6 +25,7 @@ Automatically detects and redeems KingShot gift codes for multiple players using
 ## ⚡ Quick Start (Ubuntu)
 
 ```bash
+sudo apt install git
 git clone https://github.com/j0ckinjz/kingshot-bot.git
 cd ~/kingshot-bot
 
