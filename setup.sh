@@ -10,9 +10,8 @@
 #   1. Updates the system
 #   2. Installs Google Chrome (for Selenium)
 #   3. Installs Python 3 + pip + Python dependencies
-#   4. Adds /.local/bin to PATH
-#   5. Creates logs and screenshots directories
-#   6. Creates .env and service files
+#   4. Creates logs and screenshots directories
+#   5. Creates .env and service files
 # ─────────────────────────────────────────────────────────────────────────────
 
 set -e  # Stop on any error
@@ -23,11 +22,16 @@ echo "║  KingShot Bot — Ubuntu Setup Script   ║"
 echo "╚═══════════════════════════════════════╝"
 echo ""
 
+CURRENT_USER="$(id -un)"
+PROJECT_DIR="$(pwd)"
+ENV_FILE="$PROJECT_DIR/.env"
+SERVICE_PATH="/etc/systemd/system/kingshot.service"
+
 # ── Step 1: System update ──────────────────────────────────────────────────
 echo "▶ Step 1/6: Updating system packages..."
 sudo apt-get update -qq
 sudo apt-get upgrade -y -qq
-sudo apt-get install -y -qq wget curl gnupg2 unzip python3 python3-pip git screen nano
+sudo apt-get install -y -qq wget curl gnupg2 ca-certificates unzip python3 python3-pip git screen nano
 echo "   ✅ System updated."
 
 # ── Step 2: Install Google Chrome ─────────────────────────────────────────
@@ -35,9 +39,12 @@ echo "▶ Step 2/6: Installing Google Chrome..."
 if command -v google-chrome &> /dev/null; then
     echo "   ℹ️  Chrome already installed: $(google-chrome --version)"
 else
-    wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-    echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" \
-        | sudo tee /etc/apt/sources.list.d/google-chrome.list
+    sudo install -d -m 0755 /etc/apt/keyrings
+    wget -q -O - https://dl.google.com/linux/linux_signing_key.pub \
+        | gpg --dearmor \
+        | sudo tee /etc/apt/keyrings/google-chrome.gpg > /dev/null
+    echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/google-chrome.gpg] https://dl.google.com/linux/chrome/deb/ stable main" \
+        | sudo tee /etc/apt/sources.list.d/google-chrome.list > /dev/null
     sudo apt-get update -qq
     sudo apt-get install -y -qq google-chrome-stable
     echo "   ✅ Installed: $(google-chrome --version)"
@@ -45,15 +52,19 @@ fi
 
 # ── Step 3: Install Python dependencies ───────────────────────────────────
 echo "▶ Step 3/6: Installing Python packages..."
-pip3 install --upgrade pip -q
-pip3 install \
-    selenium==4.20.0 \
-    requests==2.31.0 \
-    pyTelegramBotAPI==4.18.0 \
-    APScheduler==3.10.4 \
-    python-dotenv==1.0.1 \
-    curl_cffi==0.14.0 \
-    -q
+python3 -m pip install --upgrade pip -q
+if [ -f "$PROJECT_DIR/requirements.txt" ]; then
+    python3 -m pip install -r "$PROJECT_DIR/requirements.txt" -q
+else
+    python3 -m pip install \
+        selenium==4.20.0 \
+        requests==2.31.0 \
+        pyTelegramBotAPI==4.18.0 \
+        APScheduler==3.10.4 \
+        python-dotenv==1.0.1 \
+        curl_cffi==0.14.0 \
+        -q
+fi
 echo "   ✅ Python packages installed."
 
 # ── Step 4: Ensure ~/.local/bin is in PATH ────────────────────────────
@@ -88,11 +99,6 @@ echo "   ✅ Directories created."
 
 # ── Step 6: Create .env and systemd service if missing ─────────────────
 echo "▶ Step 6/6: Checking .env and systemd service..."
-
-CURRENT_USER="$(id -un)"
-PROJECT_DIR="$(pwd)"
-ENV_FILE="$PROJECT_DIR/.env"
-SERVICE_PATH="/etc/systemd/system/kingshot.service"
 
 echo "   ℹ️  Detected user: $CURRENT_USER"
 echo "   ℹ️  Project dir: $PROJECT_DIR"
