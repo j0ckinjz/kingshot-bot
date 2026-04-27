@@ -3,6 +3,7 @@
 ## Current revised version
 
 - Replaced basic API fetching with `curl_cffi` Chrome impersonation to better handle Cloudflare-protected gift-code API requests.
+- Preserved the original gift-code casing during redemption because KingShot gift codes are case-sensitive.
 - Added API retry handling and support for multiple gift-code response shapes.
 - Changed `seen_codes.json` from simple claimed-player lists to structured per-code/per-player records.
 - Added automatic in-memory migration support for legacy `seen_codes.json` data.
